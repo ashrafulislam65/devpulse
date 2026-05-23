@@ -1,10 +1,12 @@
 import express, { type Application, type Request, type Response } from "express";
 import cors from "cors";
+import routes from "./routes";
 
 const app : Application = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api", routes);
 
 app.get("/", (req : Request, res : Response) => {
   res.send("DevPulse API Running...");
