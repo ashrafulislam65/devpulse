@@ -8,6 +8,11 @@ router.post(
   "/",
   auth,
   IssueController.createIssue
+
+);
+router.get(
+  "/",
+  IssueController.getAllIssues
 );
 
 export default router;

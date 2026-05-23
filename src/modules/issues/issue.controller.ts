@@ -22,7 +22,27 @@ const createIssue = catchAsync(async (
     data: result,
   });
 });
+const getAllIssues = catchAsync(
+  async (req, res) => {
+    const { sort, type, status } =
+      req.query;
+
+    const result =
+      await IssueService.getAllIssues(
+        sort as string,
+        type as string,
+        status as string
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: result,
+    });
+  }
+);
 
 export const IssueController = {
   createIssue,
+  getAllIssues,
 };

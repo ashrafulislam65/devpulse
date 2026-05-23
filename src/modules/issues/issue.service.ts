@@ -22,6 +22,102 @@ const createIssue = async (
   return result.rows[0];
 };
 
+const getAllIssues = async (
+  sort = "newest",
+  type?: string,
+  status?: string
+) => {
+  let query = `SELECT * FROM issues`;
+  const values: string[] = [];
+  const conditions: string[] = [];
+
+  if (type) {
+    values.push(type);
+    conditions.push(
+      `type = $${values.length}`
+    );
+  }
+
+  if (status) {
+    values.push(status);
+    conditions.push(
+      `status = $${values.length}`
+    );
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(
+      " AND "
+    )}`;
+  }
+
+  query +=
+    sort === "oldest"
+      ? ` ORDER BY created_at ASC`
+      : ` ORDER BY created_at DESC`;
+
+  const issueResult = await pool.query(
+    query,
+    values
+  );
+
+  const issues = issueResult.rows;
+
+  if (issues.length === 0) {
+    return [];
+  }
+
+  const reporterIds = [
+    ...new Set(
+      issues.map((issue) => issue.reporter_id)
+    ),
+  ];
+
+  const reporterQuery = `
+    SELECT id,name,role
+    FROM users
+    WHERE id = ANY($1)
+  `;
+
+  const reporterResult =
+    await pool.query(reporterQuery, [
+      reporterIds,
+    ]);
+
+  const reporters =
+    reporterResult.rows;
+
+  const formattedIssues = issues.map(
+    (issue) => {
+      const reporter = reporters.find(
+        (user) =>
+          user.id === issue.reporter_id
+      );
+
+      return {
+        id: issue.id,
+        title: issue.title,
+        description:
+          issue.description,
+        type: issue.type,
+        status: issue.status,
+        reporter: {
+          id: reporter?.id,
+          name: reporter?.name,
+          role: reporter?.role,
+        },
+        created_at:
+          issue.created_at,
+        updated_at:
+          issue.updated_at,
+      };
+    }
+  );
+
+  return formattedIssues;
+};
+
 export const IssueService = {
   createIssue,
+  getAllIssues,
 };
