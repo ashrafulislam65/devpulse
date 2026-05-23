@@ -82,10 +82,30 @@ const updateIssue = catchAsync(
     });
   }
 );
+const deleteIssue = catchAsync(
+  async (req, res) => {
+    const issueId = Number(
+      req.params.id
+    );
+
+    await IssueService.deleteIssue(
+      issueId
+    );
+
+    sendResponse(res, {
+      success: true,
+      message:
+        "Issue deleted successfully",
+      statusCode: StatusCodes.OK,
+      data: null,
+    });
+  }
+);
 
 export const IssueController = {
   createIssue,
   getAllIssues,
   getSingleIssue,
   updateIssue,
+  deleteIssue,
 };

@@ -223,10 +223,32 @@ const updateIssue = async (
 
   return result.rows[0];
 };
+const deleteIssue = async (
+  issueId: number
+) => {
+  const issueResult = await pool.query(
+    `SELECT * FROM issues WHERE id=$1`,
+    [issueId]
+  );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  await pool.query(
+    `DELETE FROM issues WHERE id=$1`,
+    [issueId]
+  );
+
+  return null;
+};
 
 export const IssueService = {
   createIssue,
   getAllIssues,
   getSingleIssue,
   updateIssue,
+  deleteIssue,
 };
