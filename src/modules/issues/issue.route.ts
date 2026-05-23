@@ -18,5 +18,10 @@ router.get(
   "/:id",
   IssueController.getSingleIssue
 );
+router.patch(
+  "/:id",
+  auth,
+  IssueController.updateIssue
+);
 
 export default router;

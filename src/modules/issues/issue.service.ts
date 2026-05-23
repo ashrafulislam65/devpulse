@@ -158,9 +158,75 @@ const getSingleIssue = async (
     updated_at: issue.updated_at,
   };
 };
+const updateIssue = async (
+  issueId: number,
+  payload: Partial<IIssue>,
+  user: {
+    id: number;
+    role: string;
+  }
+) => {
+  const issueResult = await pool.query(
+    `SELECT * FROM issues WHERE id=$1`,
+    [issueId]
+  );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  // contributor permission
+  if (user.role === "contributor") {
+    if (issue.reporter_id !== user.id) {
+      throw new Error(
+        "You are not allowed to update this issue"
+      );
+    }
+
+    if (issue.status !== "open") {
+      throw new Error(
+        "Only open issues can be updated"
+      );
+    }
+  }
+
+  const updatedTitle =
+    payload.title || issue.title;
+
+  const updatedDescription =
+    payload.description ||
+    issue.description;
+
+  const updatedType =
+    payload.type || issue.type;
+
+  const result = await pool.query(
+    `
+    UPDATE issues
+    SET
+      title=$1,
+      description=$2,
+      type=$3,
+      updated_at=CURRENT_TIMESTAMP
+    WHERE id=$4
+    RETURNING *
+    `,
+    [
+      updatedTitle,
+      updatedDescription,
+      updatedType,
+      issueId,
+    ]
+  );
+
+  return result.rows[0];
+};
 
 export const IssueService = {
   createIssue,
   getAllIssues,
   getSingleIssue,
+  updateIssue,
 };

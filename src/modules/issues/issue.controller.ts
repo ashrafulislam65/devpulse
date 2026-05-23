@@ -57,9 +57,35 @@ const getSingleIssue = catchAsync(
     });
   }
 );
+const updateIssue = catchAsync(
+  async (req, res) => {
+    const issueId = Number(
+      req.params.id
+    );
+
+    const result =
+      await IssueService.updateIssue(
+        issueId,
+        req.body,
+        {
+          id: req.user!.id,
+          role: req.user!.role,
+        }
+      );
+
+    sendResponse(res, {
+      success: true,
+      message:
+        "Issue updated successfully",
+      statusCode: StatusCodes.OK,
+      data: result,
+    });
+  }
+);
 
 export const IssueController = {
   createIssue,
   getAllIssues,
   getSingleIssue,
+  updateIssue,
 };
