@@ -116,8 +116,51 @@ const getAllIssues = async (
 
   return formattedIssues;
 };
+const getSingleIssue = async (
+  issueId: number
+) => {
+  const issueResult = await pool.query(
+    `SELECT * FROM issues WHERE id=$1`,
+    [issueId]
+  );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  const reporterResult =
+    await pool.query(
+      `
+      SELECT id,name,role
+      FROM users
+      WHERE id=$1
+      `,
+      [issue.reporter_id]
+    );
+
+  const reporter =
+    reporterResult.rows[0];
+
+  return {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter: {
+      id: reporter.id,
+      name: reporter.name,
+      role: reporter.role,
+    },
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
+};
 
 export const IssueService = {
   createIssue,
   getAllIssues,
+  getSingleIssue,
 };

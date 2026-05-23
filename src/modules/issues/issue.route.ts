@@ -14,5 +14,9 @@ router.get(
   "/",
   IssueController.getAllIssues
 );
+router.get(
+  "/:id",
+  IssueController.getSingleIssue
+);
 
 export default router;

@@ -41,8 +41,25 @@ const getAllIssues = catchAsync(
     });
   }
 );
+const getSingleIssue = catchAsync(
+  async (req, res) => {
+    const id = Number(req.params.id);
+
+    const result =
+      await IssueService.getSingleIssue(
+        id
+      );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      data: result,
+    });
+  }
+);
 
 export const IssueController = {
   createIssue,
   getAllIssues,
+  getSingleIssue,
 };
